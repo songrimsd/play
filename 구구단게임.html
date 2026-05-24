@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구구단 게임 🎮</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.7); }
+            70% { transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+        @keyframes pulse {
+            0%,100% { opacity:0.5; transform:scale(1); }
+            50% { opacity:1; transform:scale(1.05); }
+        }
+        @keyframes giftReveal {
+            0% { transform: scale(0.8) rotate(-5deg); opacity: 0; }
+            60% { transform: scale(1.08) rotate(2deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes bounce {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        @keyframes rainbowHue {
+            0% { filter: hue-rotate(0deg) saturate(3) contrast(1.2); }
+            100% { filter: hue-rotate(360deg) saturate(3) contrast(1.2); }
+        }
+        @keyframes glitch {
+            0%,100% { transform: translate(0); filter: none; }
+            20% { transform: translate(-3px, 2px); filter: hue-rotate(90deg); }
+            40% { transform: translate(3px, -2px); filter: hue-rotate(180deg); }
+            60% { transform: translate(-2px, 3px); filter: hue-rotate(270deg); }
+            80% { transform: translate(2px, -1px); filter: hue-rotate(360deg); }
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-80px) scale(1.5); opacity: 0; }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes starPop {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            100% { transform: scale(2) rotate(180deg); opacity: 0; }
+        }
+
+        /* ===== 시작 화면 ===== */
+        #startScreen { animation: fadeIn 0.5s ease; }
+
+        .title {
+            font-size: 3rem; font-weight: 900;
+            background: linear-gradient(90deg, #f7971e, #ffd200);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 10px;
+        }
+
+        .subtitle { font-size: 1rem; color: #aaa; margin-bottom: 30px; }
+
+        .rules-card {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 20px; padding: 25px;
+            margin-bottom: 25px; text-align: left;
+        }
+
+        .rules-card h3 {
+            font-size: 1rem; color: #ffd200;
+            margin-bottom: 15px; text-align: center; letter-spacing: 2px;
+        }
+
+        .rule-item {
+            display: flex; align-items: center;
+            gap: 12px; margin-bottom: 12px;
+            font-size: 0.9rem; color: #ddd;
+        }
+
+        .rule-icon { font-size: 1.3rem; width: 30px; text-align: center; }
+
+        .gift-preview {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,210,0,0.3);
+            border-radius: 20px; padding: 20px; margin-bottom: 25px;
+        }
+
+        .gift-preview h3 {
+            font-size: 1rem; color: #ffd200;
+            margin-bottom: 15px; letter-spacing: 2px;
+        }
+
+        .gift-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .gift-preview-item {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px; padding: 8px 12px;
+        }
+
+        .gift-preview-stage { font-size: 0.75rem; font-weight: 700; color: #f7971e; min-width: 30px; }
+        .gift-preview-name { font-size: 0.8rem; color: #ccc; }
+
+        .start-btn {
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            border: none; border-radius: 50px;
+            padding: 18px 60px; font-size: 1.2rem;
+            font-weight: 700; color: #1a1a2e;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 8px 30px rgba(247,151,30,0.4);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(247,151,30,0.6);
+        }
+
+        /* ===== 게임 화면 ===== */
+        #gameScreen { display: none; animation: fadeIn 0.5s ease; }
+
+        .top-bar {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 15px; gap: 8px;
+        }
+
+        .info-box {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px; padding: 8px 14px;
+            font-size: 0.9rem; font-weight: 700;
+        }
+
+        .info-box span { color: #ffd200; font-size: 1.1rem; }
+
+        .lives-box {
+            background: rgba(255,68,68,0.1);
+            border: 1px solid rgba(255,68,68,0.3);
+            border-radius: 12px; padding: 8px 14px;
+            font-size: 1.2rem; letter-spacing: 3px;
+        }
+
+        .stage-progress-wrap { margin-bottom: 15px; }
+
+        .stage-label {
+            display: flex; justify-content: space-between;
+            font-size: 0.8rem; color: #aaa; margin-bottom: 6px;
+        }
+
+        .stage-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px; height: 8px; overflow: hidden;
+        }
+
+        .stage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f7971e, #ffd200);
+            border-radius: 10px; transition: width 0.5s ease;
+        }
+
+        .timer-wrap { margin-bottom: 15px; }
+
+        .timer-circle {
+            width: 80px; height: 80px;
+            margin: 0 auto; position: relative;
+        }
+
+        .timer-circle svg { transform: rotate(-90deg); width: 80px; height: 80px; }
+        .timer-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 6; }
+
+        .timer-progress {
+            fill: none; stroke: #ffd200; stroke-width: 6;
+            stroke-linecap: round; stroke-dasharray: 226;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s;
+        }
+
+        .timer-text {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem; font-weight: 900; color: #ffd200;
+        }
+
+        .question-card {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 25px; padding: 35px 20px;
+            margin-bottom: 20px; position: relative; overflow: hidden;
+        }
+
+        .question-card::before {
+            content: '';
+            position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(247,151,30,0.05) 0%, transparent 60%);
+            animation: pulse 3s infinite;
+        }
+
+        .question-text {
+            font-size: 2.8rem; font-weight: 900;
+            letter-spacing: 3px; position: relative; z-index: 1;
+        }
+
+        .question-text .num { color: #ffd200; }
+        .question-text .op { color: #888; font-size: 2.3rem; }
+
+        .input-wrap { display: flex; gap: 12px; margin-bottom: 12px; }
+
+        .answer-input {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 15px; padding: 14px 20px;
+            font-size: 1.5rem; font-weight: 700;
+            color: white; text-align: center; outline: none; transition: all 0.3s;
+        }
+
+        .answer-input:focus { border-color: #ffd200; background: rgba(255,210,0,0.1); }
+        .answer-input.correct { border-color: #00c851; background: rgba(0,200,81,0.15); }
+        .answer-input.wrong { border-color: #ff4444; background: rgba(255,68,68,0.15); animation: shake 0.4s; }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            border: none; border-radius: 15px;
+            padding: 14px 22px; font-size: 1.2rem;
+            color: #1a1a2e; font-weight: 700; cursor: pointer; transition: all 0.3s;
+        }
+
+        .submit-btn:hover { transform: scale(1.05); }
+
+        .feedback {
+            height: 32px; display: flex; align-items: center;
+            justify-content: center; font-size: 0.95rem;
+            font-weight: 700; opacity: 0; transition: opacity 0.3s;
+        }
+
+        .feedback.show { opacity: 1; }
+        .feedback.correct { color: #00c851; }
+        .feedback.wrong { color: #ff4444; }
+
+        .danger { color: #ff4444 !important; stroke: #ff4444 !important; }
+        .warning { color: #ff9900 !important; stroke: #ff9900 !important; }
+
+        /* ===== 단계 클리어 오버레이 ===== */
+        #stageClearOverlay {
+            display: none;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 100;
+            align-items: center; justify-content: center;
+            overflow-y: auto;
+        }
+
+        #stageClearOverlay.show { display: flex; }
+
+        .clear-card {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid rgba(255,210,0,0.5);
+            border-radius: 28px; padding: 30px 28px;
+            text-align: center; max-width: 360px; width: 90%;
+            animation: popIn 0.4s ease;
+            position: relative; overflow: hidden;
+            margin: 20px auto;
+        }
+
+        .clear-stage-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #1a1a2e; font-size: 0.85rem; font-weight: 900;
+            padding: 5px 15px; border-radius: 20px;
+            margin-bottom: 12px; letter-spacing: 1px;
+        }
+
+        .clear-title { font-size: 1.6rem; font-weight: 900; color: #ffd200; margin-bottom: 5px; }
+        .clear-sub { font-size: 0.88rem; color: #aaa; margin-bottom: 18px; }
+
+        /* 사진 프레임 */
+        .photo-frame {
+            position: relative;
+            width: 200px; height: 200px;
+            margin: 0 auto 18px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 3px solid rgba(255,210,0,0.5);
+        }
+
+        .photo-frame img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            display: block;
+        }
+
+        .photo-label {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.6);
+            font-size: 0.7rem; padding: 4px;
+            color: #ffd200; font-weight: 700;
+        }
+
+        /* 단계별 필터 */
+        .photo-stage-1 img { filter: none; }
+        .photo-stage-2 img { filter: grayscale(100%); }
+        .photo-stage-3 img { filter: sepia(100%); }
+        .photo-stage-4 img { transform: scaleX(-1); }
+        .photo-stage-5 img { filter: hue-rotate(140deg) saturate(2); }
+        .photo-stage-6 img { transform: scaleY(-1); }
+        .photo-stage-7 img { filter: invert(100%); }
+        .photo-stage-8 img { filter: blur(2px) brightness(1.3) contrast(1.5); transform: scale(1.15); }
+        .photo-stage-9 img { filter: contrast(200%) saturate(0); }
+        .photo-stage-10 img { animation: rainbowHue 1s linear infinite; }
+
+        /* 선물 공개 박스 */
+        .gift-reveal-box {
+            background: linear-gradient(135deg, rgba(247,151,30,0.15), rgba(255,210,0,0.08));
+            border: 2px solid rgba(255,210,0,0.4);
+            border-radius: 18px; padding: 18px 16px;
+            margin-bottom: 20px;
+            animation: giftReveal 0.6s ease 0.3s both;
+        }
+
+        .gift-reveal-label {
+            font-size: 0.78rem; color: #f7971e;
+            font-weight: 700; letter-spacing: 2px; margin-bottom: 8px;
+        }
+
+        .gift-reveal-name { font-size: 1.1rem; font-weight: 700; color: white; line-height: 1.4; }
+
+        .clear-next-btn {
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            border: none; border-radius: 50px;
+            padding: 14px 45px; font-size: 1rem;
+            font-weight: 700; color: #1a1a2e;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(247,151,30,0.4);
+        }
+
+        .clear-next-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(247,151,30,0.6); }
+
+        .clear-finish-btn {
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            border: none; border-radius: 50px;
+            padding: 14px 45px; font-size: 1rem;
+            font-weight: 700; color: white;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(168,85,247,0.4);
+        }
+
+        .clear-finish-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(168,85,247,0.6); }
+
+        /* ===== 게임오버 ===== */
+        #gameOverOverlay {
+            display: none;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.88);
+            z-index: 100;
+            align-items: center; justify-content: center;
+        }
+
+        #gameOverOverlay.show { display: flex; }
+
+        .gameover-card {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid rgba(255,68,68,0.4);
+            border-radius: 25px; padding: 35px 30px;
+            text-align: center; max-width: 320px; width: 90%;
+            animation: popIn 0.4s ease;
+        }
+
+        .gameover-emoji { font-size: 3.5rem; margin-bottom: 10px; }
+        .gameover-title { font-size: 1.8rem; font-weight: 900; color: #ff4444; margin-bottom: 8px; }
+        .gameover-sub { font-size: 0.9rem; color: #aaa; margin-bottom: 20px; line-height: 1.6; white-space: pre-line; }
+
+        .gameover-score-box {
+            background: rgba(255,255,255,0.07);
+            border-radius: 15px; padding: 15px; margin-bottom: 20px;
+        }
+
+        .gameover-score-label { font-size: 0.85rem; color: #888; margin-bottom: 4px; }
+        .gameover-score-num {
+            font-size: 2.8rem; font-weight: 900;
+            background: linear-gradient(90deg, #f7971e, #ffd200);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gameover-btns { display: flex; gap: 10px; }
+
+        .gameover-retry {
+            flex: 1; background: linear-gradient(135deg, #ff4444, #ff6b6b);
+            border: none; border-radius: 12px; padding: 13px;
+            font-size: 0.95rem; font-weight: 700; color: white;
+            cursor: pointer; transition: all 0.3s;
+        }
+
+        .gameover-retry:hover { transform: translateY(-2px); }
+
+        .gameover-result {
+            flex: 1; background: linear-gradient(135deg, #f7971e, #ffd200);
+            border: none; border-radius: 12px; padding: 13px;
+            font-size: 0.95rem; font-weight: 700; color: #1a1a2e;
+            cursor: pointer; transition: all 0.3s;
+        }
+
+        .gameover-result:hover { transform: translateY(-2px); }
+
+        /* ===== 결과 화면 ===== */
+        #resultScreen { display: none; animation: fadeIn 0.5s ease; }
+
+        .result-title { font-size: 2rem; font-weight: 900; margin-bottom: 6px; }
+        .result-sub { font-size: 0.9rem; color: #aaa; margin-bottom: 20px; }
+
+        .final-score-wrap { margin-bottom: 25px; }
+        .final-score-label { font-size: 0.9rem; color: #aaa; margin-bottom: 5px; }
+        .final-score-num {
+            font-size: 4rem; font-weight: 900;
+            background: linear-gradient(90deg, #f7971e, #ffd200);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .final-score-unit { font-size: 1.1rem; color: #aaa; }
+
+        .gifts-container { margin-bottom: 25px; }
+        .gifts-container h3 { font-size: 0.9rem; color: #ffd200; letter-spacing: 2px; margin-bottom: 15px; }
+
+        .gift-card {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 18px; border-radius: 15px;
+            margin-bottom: 10px; text-align: left;
+            position: relative; overflow: hidden;
+        }
+
+        .gift-card.locked {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .gift-card.unlocked {
+            background: linear-gradient(135deg, rgba(247,151,30,0.18), rgba(255,210,0,0.08));
+            border: 1px solid rgba(255,210,0,0.35);
+            animation: giftReveal 0.5s ease both;
+        }
+
+        .gift-card-emoji { font-size: 1.6rem; width: 40px; text-align: center; }
+        .gift-card-info { flex: 1; }
+        .gift-card-stage { font-size: 0.72rem; color: #f7971e; font-weight: 700; margin-bottom: 2px; }
+        .gift-card-name { font-size: 0.95rem; font-weight: 700; color: white; }
+        .gift-card-name.blurred { filter: blur(5px); user-select: none; }
+        .gift-card-lock { font-size: 1.2rem; }
+
+        .result-btns { display: flex; gap: 12px; }
+
+        .retry-btn {
+            flex: 1; background: linear-gradient(135deg, #f7971e, #ffd200);
+            border: none; border-radius: 50px; padding: 15px;
+            font-size: 1rem; font-weight: 700; color: #1a1a2e;
+            cursor: pointer; transition: all 0.3s;
+        }
+
+        .retry-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(247,151,30,0.4); }
+
+        .home-btn {
+            flex: 1; background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50px; padding: 15px;
+            font-size: 1rem; font-weight: 700; color: white;
+            cursor: pointer; transition: all 0.3s;
+        }
+
+        .home-btn:hover { background: rgba(255,255,255,0.15); }
+
+        /* 파티클 */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.5rem;
+            animation: floatUp 1s ease forwards;
+            z-index: 200;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- 시작 화면 -->
+    <div id="startScreen">
+        <div class="title">🔢 구구단 게임</div>
+        <div class="subtitle">10단계를 모두 깨고 선물을 모아보자!</div>
+
+        <div class="rules-card">
+            <h3>📋 게임 규칙</h3>
+            <div class="rule-item"><span class="rule-icon">🎲</span><span>1단~9단 중 랜덤으로 문제가 출제돼요</span></div>
+            <div class="rule-item"><span class="rule-icon">⏱️</span><span>1단계 <strong>20초</strong> → 10단계 <strong>3초</strong>로 점점 빨라져요!</span></div>
+            <div class="rule-item"><span class="rule-icon">📚</span><span>단계당 <strong>10문제</strong>, 모두 맞히면 다음 단계로!</span></div>
+            <div class="rule-item"><span class="rule-icon">❤️</span><span>목숨 <strong>3개</strong>! 3번 틀리면 게임 종료!</span></div>
+            <div class="rule-item"><span class="rule-icon">🎁</span><span>단계 클리어마다 선물이 <strong>즉시 공개</strong>돼요!</span></div>
+        </div>
+
+        <div class="gift-preview">
+            <h3>🎁 단계별 선물 미리보기</h3>
+            <div class="gift-grid" id="startGiftGrid"></div>
+        </div>
+
+        <button class="start-btn" onclick="startGame()">🚀 게임 시작!</button>
+    </div>
+
+    <!-- 게임 화면 -->
+    <div id="gameScreen">
+        <div class="top-bar">
+            <div class="info-box">⭐ <span id="currentScore">0</span>점</div>
+            <div class="info-box">단계 <span id="stageDisplay">1</span></div>
+            <div class="info-box" id="questionNum">1 / 10</div>
+            <div class="lives-box" id="livesBox">❤️❤️❤️</div>
+        </div>
+
+        <div class="stage-progress-wrap">
+            <div class="stage-label">
+                <span id="stageProgressLabel">1단계 진행중</span>
+                <span id="stageProgressCount">0 / 10</span>
+            </div>
+            <div class="stage-track">
+                <div class="stage-fill" id="stageFill" style="width:0%"></div>
+            </div>
+        </div>
+
+        <div class="timer-wrap">
+            <div class="timer-circle">
+                <svg viewBox="0 0 80 80">
+                    <circle class="timer-bg" cx="40" cy="40" r="36"/>
+                    <circle class="timer-progress" id="timerCircle" cx="40" cy="40" r="36"/>
+                </svg>
+                <div class="timer-text" id="timerText">20</div>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-text">
+                <span class="num" id="num1">?</span>
+                <span class="op"> × </span>
+                <span class="num" id="num2">?</span>
+                <span class="op"> = </span>
+                <span style="color:#fff">?</span>
+            </div>
+        </div>
+
+        <div class="input-wrap">
+            <input type="number" class="answer-input" id="answerInput"
+                   placeholder="정답 입력" min="1" max="81" autocomplete="off"/>
+            <button class="submit-btn" onclick="submitAnswer()">✓</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <!-- 결과 화면 -->
+    <div id="resultScreen">
+        <div class="result-title" id="resultTitle">🎉 게임 종료!</div>
+        <div class="result-sub" id="resultSub"></div>
+        <div class="final-score-wrap">
+            <div class="final-score-label">최종 점수</div>
+            <div class="final-score-num" id="finalScoreNum">0</div>
+            <div class="final-score-unit" id="finalScoreUnit">점 / 100점</div>
+        </div>
+        <div class="gifts-container">
+            <h3>🎁 획득한 선물 목록</h3>
+            <div id="giftCards"></div>
+        </div>
+        <div class="result-btns">
+            <button class="retry-btn" onclick="startGame()">🔄 다시 도전!</button>
+            <button class="home-btn" onclick="goHome()">🏠 처음으로</button>
+        </div>
+    </div>
+</div>
+
+<!-- 단계 클리어 오버레이 -->
+<div id="stageClearOverlay">
+    <div class="clear-card">
+        <div class="clear-stage-badge" id="clearStageBadge">1단계 클리어!</div>
+        <div class="clear-title" id="clearTitle">🎉 단계 클리어!</div>
+        <div class="clear-sub" id="clearSub">축하해요! 선물을 획득했어요!</div>
+
+        <!-- 사진 프레임 -->
+        <div class="photo-frame" id="photoFrame">
+            <img id="stagePhoto" src="https://www.genspark.ai/api/files/s/gG8qKPF2" alt="축하 사진" crossorigin="anonymous"/>
+            <div class="photo-label" id="photoLabel">📸 일반 모드</div>
+        </div>
+
+        <div class="gift-reveal-box">
+            <div class="gift-reveal-label">🎁 획득한 선물</div>
+            <div class="gift-reveal-name" id="clearGiftName">선물 이름</div>
+        </div>
+        <button class="clear-next-btn" id="clearNextBtn" onclick="nextStage()">다음 단계로 →</button>
+    </div>
+</div>
+
+<!-- 게임오버 오버레이 -->
+<div id="gameOverOverlay">
+    <div class="gameover-card">
+        <div class="gameover-emoji">💔</div>
+        <div class="gameover-title">게임 오버!</div>
+        <div class="gameover-sub" id="gameOverSub">목숨을 모두 잃었어요 😢</div>
+        <div class="gameover-score-box">
+            <div class="gameover-score-label">현재 점수</div>
+            <div class="gameover-score-num" id="gameOverScore">0</div>
+        </div>
+        <div class="gameover-btns">
+            <button class="gameover-retry" onclick="startGame()">🔄 다시 도전</button>
+            <button class="gameover-result" onclick="showResult()">🎁 선물 확인</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== Web Audio API 사운드 =====
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function getAudioCtx() {
+        if (!audioCtx) audioCtx = new AudioCtx();
+        return audioCtx;
+    }
+
+    function playCorrect() {
+        try {
+            const ctx = getAudioCtx();
+            const notes = [523, 659, 784, 1047]; // C E G C
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.2);
+                osc.start(ctx.currentTime + i * 0.1);
+                osc.stop(ctx.currentTime + i * 0.1 + 0.25);
+            });
+        } catch(e) {}
+    }
+
+    function playWrong() {
+        try {
+            const ctx = getAudioCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.35);
+        } catch(e) {}
+    }
+
+    function playStageClear() {
+        try {
+            const ctx = getAudioCtx();
+            // 팡파레 느낌
+            const melody = [
+                {f:523,t:0}, {f:523,t:0.1}, {f:523,t:0.2},
+                {f:523,t:0.3}, {f:659,t:0.4}, {f:784,t:0.5},
+                {f:1047,t:0.65}
+            ];
+            melody.forEach(({f, t}) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'square';
+                osc.frequency.value = f;
+                gain.gain.setValueAtTime(0.2, ctx.currentTime + t);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.18);
+                osc.start(ctx.currentTime + t);
+                osc.stop(ctx.currentTime + t + 0.2);
+            });
+        } catch(e) {}
+    }
+
+    function playGameOver() {
+        try {
+            const ctx = getAudioCtx();
+            const notes = [392, 349, 330, 261];
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.18);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.3);
+                osc.start(ctx.currentTime + i * 0.18);
+                osc.stop(ctx.currentTime + i * 0.18 + 0.35);
+            });
+        } catch(e) {}
+    }
+
+    function playFinalClear() {
+        try {
+            const ctx = getAudioCtx();
+            const melody = [
+                {f:523,t:0},{f:659,t:0.15},{f:784,t:0.3},
+                {f:1047,t:0.45},{f:784,t:0.6},{f:1047,t:0.75},
+                {f:1319,t:0.9},{f:1047,t:1.1},{f:1319,t:1.25}
+            ];
+            melody.forEach(({f, t}) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.value = f;
+                gain.gain.setValueAtTime(0.22, ctx.currentTime + t);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.22);
+                osc.start(ctx.currentTime + t);
+                osc.stop(ctx.currentTime + t + 0.25);
+            });
+        } catch(e) {}
+    }
+
+    function playTick() {
+        try {
+            const ctx = getAudioCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.06);
+        } catch(e) {}
+    }
+
+    // ===== 설정 =====
+    const TOTAL_STAGES = 10;
+    const QUESTIONS_PER_STAGE = 10;
+    const MAX_LIVES = 3;
+    const TIME_START = 20;
+    const TIME_END = 3;
+    const PHOTO_URL = 'https://www.genspark.ai/api/files/s/gG8qKPF2';
+
+    const GIFTS = [
+        { stage: 1,  name: '사랑스러운 뽀뽀 한 번' },
+        { stage: 2,  name: '달콤한 아이스크림 1개' },
+        { stage: 3,  name: '따뜻한 빵 1개' },
+        { stage: 4,  name: '포근한 안방에서 자기 쿠폰 1장' },
+        { stage: 5,  name: '맛있는 삼각김밥 1개' },
+        { stage: 6,  name: '신나는 야식 쿠폰 1장' },
+        { stage: 7,  name: '평일 영화 관람 1시간 쿠폰' },
+        { stage: 8,  name: '특별한 초밥 쿠폰 1장' },
+        { stage: 9,  name: '소중한 친구 초대권 1장' },
+        { stage: 10, name: '두근두근 닌텐도 1시간 게임권' },
+    ];
+
+    // 단계별 사진 편집 효과
+    const STAGE_PHOTO_EFFECTS = [
+        { cls: 'photo-stage-1',  label: '📸 원본 (보너스 뽀뽀!)' },
+        { cls: 'photo-stage-2',  label: '🎞️ 흑백 필름 모드' },
+        { cls: 'photo-stage-3',  label: '☕ 세피아 빈티지 모드' },
+        { cls: 'photo-stage-4',  label: '🪞 좌우 반전 미러 모드' },
+        { cls: 'photo-stage-5',  label: '💚 그린 에일리언 모드' },
+        { cls: 'photo-stage-6',  label: '🙃 위아래 뒤집기 모드' },
+        { cls: 'photo-stage-7',  label: '👻 네거티브 반전 모드' },
+        { cls: 'photo-stage-8',  label: '🌟 드림 글로우 모드' },
+        { cls: 'photo-stage-9',  label: '🎭 만화 스케치 모드' },
+        { cls: 'photo-stage-10', label: '🌈 무지개 MAX 모드' },
+    ];
+
+    function getTimeLimit(stage) {
+        return Math.round(TIME_START - (TIME_START - TIME_END) * (stage - 1) / (TOTAL_STAGES - 1));
+    }
+
+    // ===== 상태 =====
+    let score = 0;
+    let lives = MAX_LIVES;
+    let currentStage = 1;
+    let questionInStage = 0;
+    let currentAnswer = 0;
+    let timerInterval = null;
+    let timeLeft = 0;
+    let timeLimit = 0;
+    let isAnswered = false;
+    let unlockedStages = [];
+    let allQuestions = [];
+    let gameEndedBy = '';
+
+    // ===== 파티클 효과 =====
+    function spawnParticles(emojis, count = 8) {
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => {
+                const el = document.createElement('div');
+                el.className = 'particle';
+                el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                el.style.left = (10 + Math.random() * 80) + 'vw';
+                el.style.top = (30 + Math.random() * 40) + 'vh';
+                el.style.fontSize = (1 + Math.random()) + 'rem';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1000);
+            }, i * 80);
+        }
+    }
+
+    // ===== 시작화면 선물 그리드 =====
+    function renderStartGiftGrid() {
+        const grid = document.getElementById('startGiftGrid');
+        grid.innerHTML = '';
+        GIFTS.forEach(g => {
+            const item = document.createElement('div');
+            item.className = 'gift-preview-item';
+            item.innerHTML = `
+                <span class="gift-preview-stage">${g.stage}단계</span>
+                <span class="gift-preview-name">🔒 ???</span>
+            `;
+            grid.appendChild(item);
+        });
+    }
+
+    // ===== 문제 생성 =====
+    function generateStageQuestions() {
+        const q = [];
+        for (let i = 0; i < QUESTIONS_PER_STAGE; i++) {
+            const a = Math.floor(Math.random() * 9) + 1;
+            const b = Math.floor(Math.random() * 9) + 1;
+            q.push({ a, b, answer: a * b });
+        }
+        return q;
+    }
+
+    // ===== 게임 시작 =====
+    function startGame() {
+        score = 0;
+        lives = MAX_LIVES;
+        currentStage = 1;
+        questionInStage = 0;
+        unlockedStages = [];
+        gameEndedBy = '';
+
+        hideAllOverlays();
+        document.getElementById('startScreen').style.display = 'none';
+        document.getElementById('resultScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+
+        allQuestions = generateStageQuestions();
+        updateLivesUI();
+        loadQuestion();
+    }
+
+    // ===== 문제 로드 =====
+    function loadQuestion() {
+        isAnswered = false;
+        timeLimit = getTimeLimit(currentStage);
+
+        const q = allQuestions[questionInStage];
+        currentAnswer = q.answer;
+
+        document.getElementById('num1').textContent = q.a;
+        document.getElementById('num2').textContent = q.b;
+        document.getElementById('currentScore').textContent = score;
+        document.getElementById('stageDisplay').textContent = currentStage;
+        document.getElementById('questionNum').textContent = `${questionInStage + 1} / ${QUESTIONS_PER_STAGE}`;
+
+        document.getElementById('stageProgressLabel').textContent = `${currentStage}단계 진행중`;
+        document.getElementById('stageProgressCount').textContent = `${questionInStage} / ${QUESTIONS_PER_STAGE}`;
+        document.getElementById('stageFill').style.width = `${(questionInStage / QUESTIONS_PER_STAGE) * 100}%`;
+
+        document.getElementById('answerInput').value = '';
+        document.getElementById('answerInput').className = 'answer-input';
+
+        const fb = document.getElementById('feedback');
+        fb.className = 'feedback';
+        fb.textContent = '';
+
+        startTimer();
+        setTimeout(() => document.getElementById('answerInput').focus(), 100);
+        document.getElementById('answerInput').onkeydown = e => { if (e.key === 'Enter') submitAnswer(); };
+    }
+
+    // ===== 타이머 =====
+    let lastTickSecond = -1;
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = timeLimit;
+        lastTickSecond = timeLeft;
+        updateTimerUI();
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerUI();
+
+            // 마지막 5초 틱 사운드
+            if (timeLeft <= 5 && timeLeft > 0 && timeLeft !== lastTickSecond) {
+                playTick();
+                lastTickSecond = timeLeft;
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                if (!isAnswered) timeOut();
+            }
+        }, 1000);
+    }
+
+    function updateTimerUI() {
+        const circle = document.getElementById('timerCircle');
+        const text = document.getElementById('timerText');
+        const circumference = 226;
+        const offset = circumference - (timeLeft / timeLimit) * circumference;
+
+        circle.style.strokeDashoffset = offset;
+        text.textContent = timeLeft;
+        circle.className = 'timer-progress';
+        text.className = 'timer-text';
+
+        if (timeLeft <= 2) {
+            circle.classList.add('danger');
+            text.classList.add('danger');
+        } else if (timeLeft <= Math.ceil(timeLimit * 0.35)) {
+            circle.classList.add('warning');
+            text.classList.add('warning');
+        }
+    }
+
+    // ===== 목숨 UI =====
+    function updateLivesUI() {
+        document.getElementById('livesBox').textContent =
+            '❤️'.repeat(lives) + '🖤'.repeat(MAX_LIVES - lives);
+    }
+
+    // ===== 오답/시간초과 처리 =====
+    function handleWrong(reason) {
+        lives--;
+        updateLivesUI();
+        playWrong();
+
+        const fb = document.getElementById('feedback');
+        fb.textContent = reason === 'timeout'
+            ? `⏰ 시간 초과! 정답은 ${currentAnswer} (목숨 -1)`
+            : `❌ 틀렸어요! 정답은 ${currentAnswer} (목숨 -1)`;
+        fb.className = 'feedback wrong show';
+        document.getElementById('answerInput').classList.add('wrong');
+
+        if (lives <= 0) {
+            gameEndedBy = 'gameover';
+            setTimeout(() => {
+                clearInterval(timerInterval);
+                playGameOver();
+                showGameOver();
+            }, 900);
+        } else {
+            questionInStage++;
+            setTimeout(loadQuestion, 900);
+        }
+    }
+
+    // ===== 정답 제출 =====
+    function submitAnswer() {
+        if (isAnswered) return;
+        const input = document.getElementById('answerInput');
+        const val = parseInt(input.value);
+        if (isNaN(val) || input.value.trim() === '') return;
+
+        isAnswered = true;
+        clearInterval(timerInterval);
+
+        const fb = document.getElementById('feedback');
+
+        if (val === currentAnswer) {
+            score++;
+            input.classList.add('correct');
+            fb.textContent = '🎉 정답! +1점';
+            fb.className = 'feedback correct show';
+            document.getElementById('currentScore').textContent = score;
+            playCorrect();
+            spawnParticles(['⭐','✨','🌟'], 5);
+
+            questionInStage++;
+
+            if (questionInStage >= QUESTIONS_PER_STAGE) {
+                setTimeout(() => showStageClear(), 700);
+            } else {
+                setTimeout(loadQuestion, 800);
+            }
+        } else {
+            handleWrong('wrong');
+        }
+    }
+
+    // ===== 시간 초과 =====
+    function timeOut() {
+        if (isAnswered) return;
+        isAnswered = true;
+        handleWrong('timeout');
+    }
+
+    // ===== 단계 클리어 표시 =====
+    function showStageClear() {
+        clearInterval(timerInterval);
+        unlockedStages.push(currentStage);
+
+        const gift = GIFTS[currentStage - 1];
+        const effect = STAGE_PHOTO_EFFECTS[currentStage - 1];
+        const isLast = currentStage >= TOTAL_STAGES;
+
+        // 사운드
+        if (isLast) playFinalClear();
+        else playStageClear();
+
+        // 파티클
+        spawnParticles(['🎉','🎊','🌟','💫','✨'], 12);
+
+        document.getElementById('clearStageBadge').textContent = `${currentStage}단계 클리어!`;
+        document.getElementById('clearTitle').textContent = isLast ? '👑 완전 클리어!' : '🎉 단계 클리어!';
+        document.getElementById('clearSub').textContent = isLast
+            ? '모든 단계를 완주했어요! 정말 대단해요!'
+            : `${currentStage}단계 선물을 획득했어요!`;
+        document.getElementById('clearGiftName').textContent = gift.name;
+
+        // 사진 효과 적용
+        const photoFrame = document.getElementById('photoFrame');
+        photoFrame.className = 'photo-frame ' + effect.cls;
+        document.getElementById('stagePhoto').src = PHOTO_URL;
+        document.getElementById('photoLabel').textContent = effect.label;
+
+        // 버튼 설정
+        const nextBtn = document.getElementById('clearNextBtn');
+        if (isLast) {
+            nextBtn.textContent = '🎁 최종 결과 보기';
+            nextBtn.className = 'clear-finish-btn';
+            nextBtn.onclick = () => {
+                gameEndedBy = 'clear';
+                hideAllOverlays();
+                showResult();
+            };
+        } else {
+            nextBtn.textContent = `${currentStage + 1}단계 도전! →`;
+            nextBtn.className = 'clear-next-btn';
+            nextBtn.onclick = nextStage;
+        }
+
+        document.getElementById('stageClearOverlay').classList.add('show');
+    }
+
+    // ===== 다음 단계 =====
+    function nextStage() {
+        currentStage++;
+        questionInStage = 0;
+        allQuestions = generateStageQuestions();
+        hideAllOverlays();
+        document.getElementById('stageFill').style.width = '0%';
+        loadQuestion();
+    }
+
+    // ===== 게임오버 표시 =====
+    function showGameOver() {
+        document.getElementById('gameOverScore').textContent = score;
+        document.getElementById('gameOverSub').textContent =
+            unlockedStages.length > 0
+                ? `목숨을 모두 잃었어요 😢\n${currentStage}단계에서 탈락!\n획득한 선물을 확인해봐요!`
+                : `목숨을 모두 잃었어요 😢\n아쉽지만 다시 도전해봐요!`;
+        document.getElementById('gameOverOverlay').classList.add('show');
+    }
+
+    // ===== 결과 화면 =====
+    function showResult() {
+        hideAllOverlays();
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('resultScreen').style.display = 'block';
+
+        document.getElementById('finalScoreNum').textContent = score;
+        document.getElementById('finalScoreUnit').textContent = `점 / ${TOTAL_STAGES * QUESTIONS_PER_STAGE}점`;
+
+        let title = '', sub = '';
+        if (gameEndedBy === 'clear') {
+            title = '👑 완전 클리어!';
+            sub = '모든 단계를 깨다니 정말 대단해요! 선물을 모두 획득했어요!';
+            spawnParticles(['🏆','🎊','🎉','🌟','👑'], 15);
+        } else {
+            const cleared = unlockedStages.length;
+            if (cleared === 0) { title = '😢 아쉬워요!'; sub = '다음엔 꼭 선물을 획득해봐요!'; }
+            else { title = `🎁 ${cleared}개 선물 획득!`; sub = `${cleared}단계까지 클리어! 획득한 선물을 확인해봐요!`; }
+        }
+
+        document.getElementById('resultTitle').textContent = title;
+        document.getElementById('resultSub').textContent = sub;
+
+        const container = document.getElementById('giftCards');
+        container.innerHTML = '';
+        GIFTS.forEach((gift, idx) => {
+            const unlocked = unlockedStages.includes(gift.stage);
+            const card = document.createElement('div');
+            card.className = `gift-card ${unlocked ? 'unlocked' : 'locked'}`;
+            card.style.animationDelay = `${idx * 0.08}s`;
+            card.innerHTML = `
+                <div class="gift-card-info">
+                    <div class="gift-card-stage">${gift.stage}단계 클리어</div>
+                    <div class="gift-card-name ${unlocked ? '' : 'blurred'}">${gift.name}</div>
+                </div>
+                <div class="gift-card-lock">${unlocked ? '✅' : '🔒'}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // ===== 오버레이 숨기기 =====
+    function hideAllOverlays() {
+        document.getElementById('stageClearOverlay').classList.remove('show');
+        document.getElementById('gameOverOverlay').classList.remove('show');
+    }
+
+    // ===== 처음으로 =====
+    function goHome() {
+        clearInterval(timerInterval);
+        hideAllOverlays();
+        document.getElementById('resultScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('startScreen').style.display = 'block';
+    }
+
+    // ===== 초기화 =====
+    renderStartGiftGrid();
+</script>
+</body>
+</html>
